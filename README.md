@@ -2,7 +2,7 @@
 
 Open source WordPress block engine for Gutenberg. Combines the best of both worlds: the ease of editing of native Gutenberg blocks and the easiness of ACF blocks.
 
-WP Bodybuilder is currently an unstable prototype. I would not recommend to use it in production.
+WP Bodybuilder is currently an **unstable prototype**. I would not recommend to use it in production.
 
 ## How to install?
 
@@ -13,13 +13,24 @@ You need to git clone this plugin to your plugins directory, and then run `npm i
 Create a file in your theme's `template-parts/blocks` directory. For example: `template-parts/blocks/test.php`. Then add the following code:
 
 ```php
-<section class="block block-test">
-  <h1 wp-rich="title">Title placeholder</h1>
-  <h2>Not a rich title</h2>
+<?php
+$block->register_attribute('test-attribute', 'string', 'Heading, just not rich text');
+$block->register_attribute('another-test-attribute', 'boolean', false);
+?>
+
+<section class="block block-testi">
+  <h1 wp-rich="title" wp-placeholder="Gutenberg heading placeholder">
+    <?php echo $block->attr('title'); ?>
+  </h1>
+  <h2><?php echo $block->attr('test-attribute'); ?></h2>
 
   <!-- Use wp-rich-formats to specify allowed formats, default none. -->
   <!-- Separated by a comma, no spaces. If a namespace (namespace/format) is not specified, by default using core -->
-  <p wp-rich="description" wp-rich-formats="bold,italic,code,image,text-color,link,keyboard">Description placeholder</p>
+  <p wp-rich="description" wp-rich-formats="bold,italic,code,image,text-color,link,keyboard"><?php echo $block->attr('description'); ?></p>
+
+  <?php if ($block->attr('another-test-attribute')) : ?>
+    <p>The test attribute is true</p>
+  <?php endif; ?>
 </section>
 ```
 
@@ -36,12 +47,15 @@ add_action('bodybuilder_init', __NAMESPACE__ . '\block_register');
 
 ### Using attributes and stuff inside block template
 
-The template file can access the `$data` variable to access the following values:
+The template file can access the `$block` variable to access the block being rendered.
 
-- attributes: The attributes of the block
-- content: The content of the block
-- block: The block instance
-- is_editor: Whether the block is being rendered in the editor or not
+- `$block->attributes`: Attributes of the block (recommended to use `$block->attr()` instead)
+- `$block->content`: The content of the block
+- `$block->block`: The WP_Block instance
+- `$block->is_editor`: Is the block being rendered in the editor
+
+- `$block->attr('attribute_name')`: Get an attribute value, or return null
+- `$block->register_attribute('attribute_name', 'type (string/boolean)', 'default value')`: Register an attribute
 
 ## How does it work?
 

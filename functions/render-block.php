@@ -14,12 +14,7 @@ function render_bodybuilder_block($attributes, $content, $block)
     return '';
   }
 
-  $data = [
-    'attributes' => $attributes,
-    'content' => $content,
-    'block' => $block,
-    'is_editor' => $is_editor
-  ];
+  $block = new BodybuilderBlock($attributes, $content, $block, $is_editor);
 
   ob_start();
   require $template_path;

@@ -1,3 +1,3 @@
-### 1.0.0: 2022-08-19
+### 1.0.0: 2023-10-15
 
-- Initial release
+- Initial prototype release

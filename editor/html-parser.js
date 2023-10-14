@@ -38,7 +38,9 @@ export default function bringHtmlToLife(
             value={attributes[attributeName] ?? ""} // Any existing content, either from the database or an attribute default
             allowedFormats={formats} // Allow the content to be made bold or italic, but do not allow other formatting options
             onChange={(content) => setAttributes({ [attributeName]: content })} // Store updated content as a block attribute
-            placeholder={children[0] ?? __("Heading 1 placeholder")} // Display this text before any content has been added by the user
+            placeholder={
+              node.attribs["wp-placeholder"] ?? __("Start writing...")
+            } // Display this text before any content has been added by the user
           />
         );
       },

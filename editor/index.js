@@ -1,5 +1,5 @@
 // WP Bodybuilder's editor script entry point
-import { useBlockProps } from "@wordpress/block-editor";
+import { useBlockProps, InspectorControls } from "@wordpress/block-editor";
 import {
   registerBlockType,
   __experimentalSanitizeBlockAttributes,
@@ -8,10 +8,23 @@ import { ServerSideRender } from "@wordpress/server-side-render";
 import apiFetch from "@wordpress/api-fetch";
 import { addQueryArgs } from "@wordpress/url";
 import fastDeepEqual from "fast-deep-equal/es6";
-import { RawHTML, useState, useEffect, useRef } from "@wordpress/element";
+import {
+  RawHTML,
+  useState,
+  useEffect,
+  useRef,
+  useMemo,
+} from "@wordpress/element";
 import { useDebounce, usePrevious } from "@wordpress/compose";
 import bringHtmlToLife from "./html-parser";
-import { Spinner } from "@wordpress/components";
+import {
+  Spinner,
+  TextControl,
+  PanelBody,
+  PanelRow,
+  ToggleControl,
+} from "@wordpress/components";
+import { __ } from "@wordpress/i18n";
 
 export function rendererPath(block, attributes = null, urlQueryArgs = {}) {
   return addQueryArgs(`/wp/v2/block-renderer/${block}`, {
@@ -23,8 +36,8 @@ export function rendererPath(block, attributes = null, urlQueryArgs = {}) {
 
 // Most of this code is taken from @wordpress/server-side-render
 // So it doesn't look very good and could use some refactoring
-const registerBlock = (name) => {
-  console.log("Registering block", name);
+const registerBlock = (name, attributes) => {
+  console.log("Registering block", name, attributes);
   registerBlockType(name, {
     edit: (props) => {
       const blockProps = useBlockProps({
@@ -77,13 +90,27 @@ const registerBlock = (name) => {
       const debouncedFetchData = useDebounce(fetchData, 500);
       const hasResponse = !!response;
 
+      const sidebarAttributes = useMemo(() => {
+        console.log(attributes, props.attributes, {
+          attributes,
+          ...props.attributes,
+        });
+        return Object.keys(attributes)
+          .map((key) => ({
+            name: key,
+            value: props.attributes[key],
+            ...attributes[key],
+          }))
+          .filter((i) => i["bb-type"] === "sidebar");
+      }, [props]);
+
       useEffect(() => {
         if (hasResponse) {
           debouncedFetchData();
         } else {
           fetchData();
         }
-      }, []); // Only on non-rich-text attributes
+      }, [sidebarAttributes]); // Only on non-rich-text attributes
 
       if (!hasResponse) {
         return (
@@ -97,16 +124,66 @@ const registerBlock = (name) => {
         return <div {...blockProps}>Error: {response.errorMsg}</div>;
       }
 
-      return React.cloneElement(
-        bringHtmlToLife(response, props.attributes, props.setAttributes),
-        blockProps
+      const serialized = bringHtmlToLife(
+        response,
+        props.attributes,
+        props.setAttributes
+      );
+
+      return (
+        <>
+          {React.cloneElement(serialized, {
+            ...blockProps,
+            children: [
+              ...serialized.props.children,
+              sidebarAttributes.length > 0 ? (
+                <InspectorControls key={name}>
+                  <PanelBody
+                    title={__("Block Settings", "bodybuilder")}
+                    initialOpen={true}
+                  >
+                    {sidebarAttributes.map((attribute) => (
+                      <PanelRow>
+                        <fieldset key={attribute.name}>
+                          {attribute.type === "string" && (
+                            <TextControl
+                              label={__(attribute.name, "bodybuilder")}
+                              value={props.attributes[attribute.name]}
+                              onChange={(val) =>
+                                props.setAttributes({ [attribute.name]: val })
+                              }
+                            />
+                          )}
+                          {attribute.type === "boolean" && (
+                            <ToggleControl
+                              label={__(attribute.name, "bodybuilder")}
+                              checked={props.attributes[attribute.name]}
+                              onChange={(val) =>
+                                props.setAttributes({ [attribute.name]: val })
+                              }
+                            />
+                          )}
+                        </fieldset>
+                      </PanelRow>
+                    ))}
+                  </PanelBody>
+                </InspectorControls>
+              ) : (
+                <></>
+              ),
+            ],
+          })}
+        </>
       );
     },
     save: () => null,
   });
 };
 
-const registerBlocks = (names) => names.forEach((name) => registerBlock(name));
+const registerBlocks = (blocks) => {
+  console.log(blocks);
+  Object.keys(blocks).forEach((name) => registerBlock(name, blocks[name]));
+};
 
 window.bodybuilder = {
   register_block: registerBlock,

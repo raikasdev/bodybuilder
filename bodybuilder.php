@@ -22,9 +22,10 @@ require 'helpers.php';
 
 function bodybuilder_lift_up()
 {
+  require_once bodybuilder_base_path() . '/inc/block.php';
+
   require_once bodybuilder_base_path() . '/functions/render-block.php';
   require_once bodybuilder_base_path() . '/functions/register.php';
-  require_once bodybuilder_base_path() . '/functions/get.php';
 
   do_action('bodybuilder_init');
 }

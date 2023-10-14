@@ -10,12 +10,13 @@ function register_bodybuilder_block($id, $args = array())
   $attributes = [];
 
   if (!empty($template_path)) {
-    $data = [
-      'attributes' => [],
-      'content' => '',
-      'block' => null,
-      'is_editor' => true,
-    ];
+    $block = new FakeBodybuilderBlock(function ($name, $type, $default) use (&$attributes) {
+      $attributes[$name] = [
+        'type'    => $type,
+        'default' => $default,
+        'bb-type' => 'sidebar',
+      ];
+    });
 
     ob_start();
     require $template_path;
@@ -29,7 +30,9 @@ function register_bodybuilder_block($id, $args = array())
       // get the class attr
       $attributeName = $element->getAttribute('wp-rich');
       $attributes[$attributeName] = [
-        'type' => 'string',
+        'type'    => 'string',
+        'default' => '',
+        'bb-type' => 'rich-text',
       ];
     }
   }
@@ -46,7 +49,7 @@ function register_bodybuilder_block($id, $args = array())
   ], $args));
 
   add_filter('bodybuilder_registered_blocks', function ($blocks) use ($block) {
-    $blocks[] = $block->name;
+    $blocks[$block->name] = $block->attributes;
     return $blocks;
   });
 
