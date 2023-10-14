@@ -4,6 +4,10 @@ Open source WordPress block engine for Gutenberg. Combines the best of both worl
 
 WP Bodybuilder is currently an unstable prototype. I would not recommend to use it in production.
 
+## How to install?
+
+You need to git clone this plugin to your plugins directory, and then run `npm install` and `npm run build` to build the Gutenberg scripts.
+
 ## How to use?
 
 Create a file in your theme's `template-parts/blocks` directory. For example: `template-parts/blocks/test.php`. Then add the following code:
