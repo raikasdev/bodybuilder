@@ -33,3 +33,19 @@ function block_register()
 
 add_action('bodybuilder_init', __NAMESPACE__ . '\block_register');
 ```
+
+### Using attributes and stuff inside block template
+
+The template file can access the `$data` variable to access the following values:
+
+- attributes: The attributes of the block
+- content: The content of the block
+- block: The block instance
+- is_editor: Whether the block is being rendered in the editor or not
+
+## How does it work?
+
+Most of the magic happens client side by using a HTML parser to turn the rendered block HTML to React using `html-to-react`.
+In the process the text tags with `wp-rich` attribute are turned into RichText-elements.
+
+On the backend the block is registered and the HTML is parsed to find the wp-rich attribute IDs to register.
