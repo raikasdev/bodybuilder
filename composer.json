@@ -1,0 +1,22 @@
+{
+  "name": "raikasdev/wp-bodybuilder",
+  "type": "wordpress-plugin",
+  "description": "Build native WordPress blocks using PHP without having to leave your editor",
+  "homepage": "https://https://github.com/raikasdev/bodybuilder",
+  "keywords": [
+    "wordpress",
+    "plugin"
+  ],
+  "license": "GPL-3.0+",
+  "version": "1.0.0",
+  "authors": [
+    {
+      "name": "Roni Äikäs",
+      "email": "roni@raikas.dev",
+      "homepage": "https://github.com/raikasdev"
+    }
+  ],
+  "require": {
+    "paquettg/php-html-parser": "^3.1"
+  }
+}
