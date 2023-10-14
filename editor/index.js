@@ -21,7 +21,8 @@ export function rendererPath(block, attributes = null, urlQueryArgs = {}) {
   });
 }
 
-// TODO: add parsing & client side rendering for rich texts
+// Most of this code is taken from @wordpress/server-side-render
+// So it doesn't look very good and could use some refactoring
 const registerBlock = (name) => {
   console.log("Registering block", name);
   registerBlockType(name, {
