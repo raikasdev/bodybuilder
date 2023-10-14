@@ -37,7 +37,7 @@ export function rendererPath(block, attributes = null, urlQueryArgs = {}) {
 // Most of this code is taken from @wordpress/server-side-render
 // So it doesn't look very good and could use some refactoring
 const registerBlock = (name, attributes) => {
-  console.log("Registering block", name, attributes);
+  console.log("Registering block", name);
   registerBlockType(name, {
     edit: (props) => {
       const blockProps = useBlockProps({
@@ -91,10 +91,6 @@ const registerBlock = (name, attributes) => {
       const hasResponse = !!response;
 
       const sidebarAttributes = useMemo(() => {
-        console.log(attributes, props.attributes, {
-          attributes,
-          ...props.attributes,
-        });
         return Object.keys(attributes)
           .map((key) => ({
             name: key,
@@ -181,7 +177,6 @@ const registerBlock = (name, attributes) => {
 };
 
 const registerBlocks = (blocks) => {
-  console.log(blocks);
   Object.keys(blocks).forEach((name) => registerBlock(name, blocks[name]));
 };
 
