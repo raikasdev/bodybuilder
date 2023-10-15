@@ -1,5 +1,5 @@
 import { ProcessNodeDefinitions, Parser } from "html-to-react";
-import { RichText } from "@wordpress/block-editor";
+import { InnerBlocks, RichText } from "@wordpress/block-editor";
 import { __ } from "@wordpress/i18n";
 
 const htmlToReactParser = new Parser();
@@ -43,6 +43,19 @@ export default function bringHtmlToLife(
             } // Display this text before any content has been added by the user
           />
         );
+      },
+    },
+    {
+      // InnerBlocks
+      shouldProcessNode: (node) => node.name?.toLowerCase() === "innerblocks",
+      processNode: (node, children) => {
+        const allowedBlocks =
+          node.attribs["wp-allowed-blocks"]
+            ?.split(",")
+            .map((format) =>
+              format.includes("/") ? format : `core/${format}`
+            ) ?? [];
+        return <InnerBlocks allowedBlocks={allowedBlocks} />;
       },
     },
     {

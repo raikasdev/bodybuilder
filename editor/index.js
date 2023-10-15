@@ -1,5 +1,9 @@
 // WP Bodybuilder's editor script entry point
-import { useBlockProps, InspectorControls } from "@wordpress/block-editor";
+import {
+  useBlockProps,
+  InspectorControls,
+  InnerBlocks,
+} from "@wordpress/block-editor";
 import {
   registerBlockType,
   __experimentalSanitizeBlockAttributes,
@@ -23,6 +27,7 @@ import {
   PanelBody,
   PanelRow,
   ToggleControl,
+  SelectControl,
 } from "@wordpress/components";
 import { __ } from "@wordpress/i18n";
 
@@ -139,11 +144,14 @@ const registerBlock = (name, attributes) => {
                     initialOpen={true}
                   >
                     {sidebarAttributes.map((attribute) => (
-                      <PanelRow>
-                        <fieldset key={attribute.name}>
-                          {attribute.type === "string" && (
+                      <PanelRow key={attribute.name}>
+                        <fieldset style={{ width: "100%" }}>
+                          {attribute.type === "string" && !attribute.enum && (
                             <TextControl
-                              label={__(attribute.name, "bodybuilder")}
+                              label={__(
+                                attribute["bb-label"] || attribute.name,
+                                "bodybuilder"
+                              )}
                               value={props.attributes[attribute.name]}
                               onChange={(val) =>
                                 props.setAttributes({ [attribute.name]: val })
@@ -152,8 +160,29 @@ const registerBlock = (name, attributes) => {
                           )}
                           {attribute.type === "boolean" && (
                             <ToggleControl
-                              label={__(attribute.name, "bodybuilder")}
+                              label={__(
+                                attribute["bb-label"] || attribute.name,
+                                "bodybuilder"
+                              )}
                               checked={props.attributes[attribute.name]}
+                              onChange={(val) =>
+                                props.setAttributes({ [attribute.name]: val })
+                              }
+                            />
+                          )}
+                          {attribute.enum && (
+                            <SelectControl
+                              label={__(
+                                attribute["bb-label"] || attribute.name,
+                                "bodybuilder"
+                              )}
+                              value={props.attributes[attribute.name]}
+                              options={Object.keys(attribute["bb-options"]).map(
+                                (key) => ({
+                                  value: key,
+                                  label: attribute["bb-options"][key],
+                                })
+                              )}
                               onChange={(val) =>
                                 props.setAttributes({ [attribute.name]: val })
                               }
@@ -172,7 +201,7 @@ const registerBlock = (name, attributes) => {
         </>
       );
     },
-    save: () => null,
+    save: () => <InnerBlocks.Content />,
   });
 };
 

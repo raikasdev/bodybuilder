@@ -30,7 +30,7 @@ class BodybuilderBlock
     return array_key_exists($attribute_name, $this->attributes) ? $this->attributes[$attribute_name] : null;
   }
 
-  function register_attribute($name, $type = 'string', $default = '')
+  function register_attribute($name, $label, $type = 'string', $default = '', $args = [])
   {
   }
 }
@@ -55,8 +55,12 @@ class FakeBodybuilderBlock extends BodybuilderBlock
     return null;
   }
 
-  function register_attribute($name, $type = 'string', $default = '')
+  function register_attribute($name, $label, $type = 'string', $default = '', $args = [])
   {
-    call_user_func($this->callback, $name, $type, $default);
+    if (!isset($label)) {
+      $label = $name;
+    }
+
+    call_user_func($this->callback, $name, $label, $type, $default, $args);
   }
 }

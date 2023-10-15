@@ -2,20 +2,44 @@
 
 use PHPHtmlParser\Dom;
 
-function register_bodybuilder_block($id, $args = array())
+function register_bodybuilder_block($args = array())
 {
+  if (!isset($args['name'])) {
+    _doing_it_wrong('register_bodybuilder_block', 'Block name must be supplied', '1.0.0');
+    return;
+  }
+  if (!isset($args['title'])) {
+    $args['title'] = $args['name'];
+  }
+
   // We parse the HTML from the template file to get the rich text the block uses
-  $template_path = locate_template("template-parts/blocks/{$id}.php");
+  // TODO: add filter
+  $template_path = locate_template("template-parts/blocks/{$args['name']}.php");
 
   $attributes = [];
 
   if (!empty($template_path)) {
-    $block = new FakeBodybuilderBlock(function ($name, $type, $default) use (&$attributes) {
-      $attributes[$name] = [
-        'type'    => $type,
-        'default' => $default,
-        'bb-type' => 'sidebar',
-      ];
+    $block = new FakeBodybuilderBlock(function ($name, $label, $type, $default, $args) use (&$attributes) {
+      switch ($type) {
+        case 'enum':
+          $attributes[$name] = [
+            'type'       => 'string',
+            'enum'       => array_keys($args),
+            'default'    => $default,
+            'bb-type'    => 'sidebar',
+            'bb-label'   => $label,
+            'bb-options' => $args,
+          ];
+          break;
+        default:
+          $attributes[$name] = [
+            'type'     => $type,
+            'default'  => $default,
+            'bb-type'  => 'sidebar',
+            'bb-label' => $label,
+          ];
+          break;
+      }
     });
 
     ob_start();
@@ -41,12 +65,12 @@ function register_bodybuilder_block($id, $args = array())
   // Then, we parse the get_field() calls to get the programmatical key for the attributes
 
   // Then, we register the block
-  $block = new WP_Block_Type('bodybuilder/' . $id, array_merge([
+  $block = new WP_Block_Type('bodybuilder/' . $args['name'], array_merge($args, [
     "api_version"     => 3,
-    "title"           => "Bodybuilder Block: " . $id,
+    "title"           => $args['title'],
     "render_callback" => 'render_bodybuilder_block',
     "attributes"      => $attributes,
-  ], $args));
+  ]));
 
   add_filter('bodybuilder_registered_blocks', function ($blocks) use ($block) {
     $blocks[$block->name] = $block->attributes;

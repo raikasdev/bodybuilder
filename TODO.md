@@ -1,4 +1,5 @@
 # TODO
 
-- Remove wp-rich attribute in render function
 - Add more sidebar attribute types
+- Add more configurability using filters
+- Investigate Regex instead of HTML parsing
